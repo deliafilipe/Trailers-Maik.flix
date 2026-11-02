@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Maik.Flix trailer</title>
+<link rel="preconnect" href="https://www.youtube.com">
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://www.google.com">
 <style>
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
   #p { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
@@ -12,26 +15,49 @@
 <body>
 <div id="p"></div>
 <script>
+  // Página auxiliar do Maik.Flix (v2).
+  // O YouTube só aceita o player embutido quando ele vem de um site com endereço.
+  // Modo "host=1": o app deixa ESTA página carregada o tempo todo e só manda trocar o vídeo
+  //   ({flix:"load", v, vol, start}) — muito mais rápido que recarregar o player a cada título.
+  // Modo "?v=ID": compatível com versões antigas do app (toca um vídeo direto).
   function param(n) { var m = location.search.match(new RegExp("[?&]" + n + "=([^&]*)")); return m ? decodeURIComponent(m[1]) : ""; }
-  var videoId = param("v"), vol = parseInt(param("vol"), 10) || 45, player = null;
+  var startV = param("v"), vol = parseInt(param("vol"), 10) || 45, player = null, ready = false, pending = null, cur = startV;
   function send(m) { try { parent.postMessage(JSON.stringify(m), "*"); } catch (e) {} }
+  function doLoad(m) {
+    cur = m.v; vol = m.vol || vol;
+    try { if (m.mute) player.mute(); else { player.unMute(); player.setVolume(vol); } } catch (e) {}
+    player.loadVideoById({ videoId: m.v, startSeconds: m.start || 0 });
+  }
   var tag = document.createElement("script");
   tag.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(tag);
   window.onYouTubeIframeAPIReady = function () {
-    player = new YT.Player("p", {
-      videoId: videoId, width: "100%", height: "100%",
+    var opts = {
+      width: "100%", height: "100%",
       playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, playsinline: 1, rel: 0, cc_load_policy: 0, hl: "pt-BR", origin: location.protocol + "//" + location.host },
       events: {
-        onReady: function (e) { e.target.setVolume(vol); e.target.playVideo(); },
-        onStateChange: function (e) { send({ flix: "state", s: e.data }); },
-        onError: function (e) { send({ flix: "error", e: e.data }); }
+        onReady: function (e) {
+          ready = true;
+          e.target.setVolume(vol);
+          send({ flix: "ready", ver: 2 });
+          if (pending) { doLoad(pending); pending = null; }
+          else if (startV) e.target.playVideo();
+        },
+        onStateChange: function (e) { send({ flix: "state", s: e.data, v: cur }); },
+        onError: function (e) { send({ flix: "error", e: e.data, v: cur }); }
       }
-    });
+    };
+    if (startV) opts.videoId = startV;
+    player = new YT.Player("p", opts);
   };
   window.addEventListener("message", function (e) {
     var d; try { d = JSON.parse(e.data); } catch (x) { return; }
-    if (d && d.flix === "mute" && player) { player.mute(); player.playVideo(); }
+    if (!d || !d.flix) return;
+    if (d.flix === "load") { if (ready) doLoad(d); else pending = d; }
+    else if (d.flix === "stop") { cur = ""; pending = null; if (ready) try { player.stopVideo(); } catch (x) {} }
+    else if (d.flix === "mute") { if (ready) try { player.mute(); player.playVideo(); } catch (x) {} }
+    else if (d.flix === "unmute") { if (ready) try { player.unMute(); player.setVolume(d.vol || vol); } catch (x) {} }
+    else if (d.flix === "ping") send({ flix: "pong", ver: 2, ready: ready });
   });
 </script>
 </body>
