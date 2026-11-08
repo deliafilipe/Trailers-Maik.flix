@@ -26,6 +26,20 @@
   @keyframes s { to { transform: rotate(360deg); } }
   .small { margin-top: 26px; font-size: 13px; color: #77777f; }
   .err { color: #ff8a80; }
+
+  .card { margin-top: 26px; text-align: left; background: #17171c; border: 1px solid #2a2a31; border-radius: 14px; padding: 18px; }
+  .tabs { display: flex; gap: 8px; margin: 22px 0 4px; }
+  .tab { flex: 1; height: 40px; border-radius: 10px; border: 1px solid #34343c; background: transparent; color: #ccc; font: inherit; font-weight: 700; font-size: 14px; }
+  .tab.on { background: #fff; color: #111; border-color: #fff; }
+  label { display: block; margin: 14px 0 6px; font-size: 13px; color: #a8a8b2; font-weight: 600; }
+  input { width: 100%; height: 46px; border-radius: 10px; border: 1px solid #34343c; background: #0f0f13; color: #fff; padding: 0 12px; font: inherit; font-size: 16px; outline: none; }
+  input:focus { border-color: #e50914; }
+  .pw { position: relative; } .pw button { position: absolute; right: 6px; top: 6px; height: 34px; border: 0; background: #26262d; color: #ddd; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 12px; }
+  .red { margin-top: 22px; width: 100%; height: 52px; border: 0; border-radius: 12px; background: #e50914; color: #fff; font: inherit; font-size: 17px; font-weight: 800; }
+  .ghost { margin-top: 10px; width: 100%; height: 46px; border: 1px solid #34343c; border-radius: 12px; background: transparent; color: #ddd; font: inherit; font-size: 15px; font-weight: 700; }
+  .sum b { color: #fff; } .sum { font-size: 15px; color: #c4c4cc; line-height: 1.7; }
+  .hint { margin-top: 10px; font-size: 12.5px; color: #8a8a94; line-height: 1.5; }
+  .msg { margin-top: 12px; font-size: 13.5px; color: #ff8a80; min-height: 18px; }
 </style>
 </head>
 <body>
@@ -34,50 +48,125 @@
   <div id="v"></div>
 </div>
 <script>
-  // ======== CONFIGURAÇÃO (preencha com os dados do seu projeto Supabase) ========
+  // ======== CONFIGURAÇÃO (dados públicos do projeto Supabase) ========
   var SUPABASE_URL = "https://titaxncpdzztpewuoacl.supabase.co";
   var SUPABASE_ANON_KEY = "sb_publishable_W9sooeSKntQAphJxGBE6Cg_wMrOJ2gz";
-  // ==============================================================================
+  // ===================================================================
   var G = '<svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>';
   var CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var v = document.getElementById("v");
   function q(n, s) { var m = (s || location.search).match(new RegExp("[?&#]" + n + "=([^&]*)")); return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : ""; }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function jwt(t) { try { return JSON.parse(decodeURIComponent(escape(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))))); } catch (e) { return {}; } }
-  var pid = q("p");
-  var hash = location.hash || "";
+  function api(path, method, body) {
+    return fetch(SUPABASE_URL + path, { method: method || "GET",
+      headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + AT, "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.text().then(function (t) { return t ? JSON.parse(t) : null; }); });
+  }
+  var pid = q("p"), hash = location.hash || "", AT = "", RT = "", WHO = "", EMAIL = "", CUR = null;
+
+  // tenta tirar servidor/usuário/senha de um link M3U (get.php?username=…&password=… ou /playlist/usuário/senha/…)
+  function fromM3u(u) {
+    try {
+      var a = document.createElement("a"); a.href = u;
+      var host = a.protocol + "//" + a.host, us = q("username", a.search), pw = q("password", a.search);
+      if (us && pw) return { host: host, username: us, password: pw };
+      var m = a.pathname.match(/^\/(?:playlist|get|m3u|live)\/([^\/]+)\/([^\/]+)/i);
+      if (m) return { host: host, username: decodeURIComponent(m[1]), password: decodeURIComponent(m[2]) };
+    } catch (e) {}
+    return null;
+  }
+  function cleanHost(h) {
+    h = String(h || "").trim().replace(/\s+/g, "");
+    if (!h) return "";
+    if (!/^https?:\/\//i.test(h)) h = "http://" + h;
+    h = h.replace(/\/(player_api\.php|get\.php|panel_api\.php|c)\b.*$/i, "").replace(/\/+$/, "");
+    return h;
+  }
+
   if (!/^[A-Za-z0-9]{20,64}$/.test(pid)) {
     v.innerHTML = "<h1>Abra pelo QR code</h1><p>Esta página é aberta pelo QR code que aparece na TV (ou pelo botão “Entrar com Google” no app do celular).</p>";
   } else if (/access_token=/.test(hash)) {
-    var at = q("access_token", hash), rt = q("refresh_token", hash), info = jwt(at), md = info.user_metadata || {};
-    var who = md.full_name || md.name || info.email || "";
+    AT = q("access_token", hash); RT = q("refresh_token", hash);
+    var info = jwt(AT), md = info.user_metadata || {};
+    WHO = md.full_name || md.name || ""; EMAIL = info.email || "";
     history.replaceState(null, "", location.pathname + "?p=" + pid);
-    v.innerHTML = '<div class="spin"></div><p style="margin-top:18px">Conectando o Maik.Flix…</p>';
-    fetch(SUPABASE_URL + "/rest/v1/rpc/pair_put", {
-      method: "POST",
-      headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + at, "Content-Type": "application/json" },
-      body: JSON.stringify({ pid: pid, token: rt })
-    }).then(function (r) {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      v.innerHTML = '<div class="ok">' + CHECK + "</div><h1>Pronto" + (who ? ", " + esc(who.split(" ")[0]) : "") + "!</h1>" +
-        "<p>Pode voltar para o Maik.Flix — ele conecta sozinho em alguns segundos.</p>" +
-        (info.email ? '<p class="small">Conta: ' + esc(info.email) + "</p>" : "");
-    }).catch(function (e) {
-      v.innerHTML = '<h1 class="err">Não deu certo</h1><p>Não consegui avisar o app (' + esc(e.message) + "). Gere um QR code novo e tente de novo.</p>";
-    });
+    v.innerHTML = '<div class="spin"></div><p style="margin-top:18px">Carregando sua conta…</p>';
+    api("/rest/v1/user_data?select=data").then(function (rows) {
+      var d = rows && rows[0] && rows[0].data;
+      CUR = d && d.iptv && d.iptv[1] ? d.iptv[1] : null;
+      if (CUR && (CUR.host || CUR.m3u)) showSaved(); else showForm(null);
+    }).catch(function () { showForm(null); });
   } else if (/error/.test(hash) || q("error")) {
-    v.innerHTML = '<h1 class="err">Login cancelado</h1><p>' + esc(q("error_description", hash) || q("error_description") || "Tente de novo.") + "</p>";
-    v.innerHTML += '<button class="g" id="go">' + G + "Tentar de novo</button>";
+    v.innerHTML = '<h1 class="err">Login cancelado</h1><p>' + esc(q("error_description", hash) || q("error_description") || "Tente de novo.") + "</p>" +
+      '<button class="g" id="go">' + G + "Tentar de novo</button>";
     document.getElementById("go").onclick = login;
   } else {
-    v.innerHTML = "<h1>Entre para salvar seu histórico</h1><p>Seu progresso, a Minha Lista e os perfis ficam guardados na sua conta Google — em qualquer TV ou celular.</p>" +
+    v.innerHTML = "<h1>Entre com sua conta Google</h1><p>Depois você informa a sua lista IPTV. Seu histórico, a Minha Lista e os perfis ficam salvos na sua conta — em qualquer TV ou celular.</p>" +
       '<button class="g" id="go">' + G + "Entrar com Google</button>" +
-      '<p class="small">O Maik.Flix só recebe seu nome e e-mail.</p>';
+      '<p class="small">O Maik.Flix só recebe seu nome e e-mail do Google.</p>';
     document.getElementById("go").onclick = login;
   }
   function login() {
     var back = location.origin + location.pathname + "?p=" + pid;
     location.href = SUPABASE_URL + "/auth/v1/authorize?provider=google&redirect_to=" + encodeURIComponent(back);
+  }
+  function hello() { return "Olá" + (WHO ? ", " + esc(WHO.split(" ")[0]) : "") + "!"; }
+  function showSaved() {
+    var c = CUR, desc = c.host ? "<b>" + esc(c.host.replace(/^https?:\/\//, "")) + "</b><br>usuário <b>" + esc(c.username) + "</b>" : "<b>Link M3U</b><br>" + esc(String(c.m3u).slice(0, 48)) + "…";
+    v.innerHTML = "<h1>" + hello() + "</h1><p>Sua lista IPTV já está salva na sua conta.</p>" +
+      '<div class="card sum">' + desc + "</div>" +
+      '<button class="red" id="use">Continuar com esta lista</button><button class="ghost" id="edit">Alterar a lista</button><div class="msg" id="msg"></div>';
+    document.getElementById("use").onclick = function () { finish(); };
+    document.getElementById("edit").onclick = function () { showForm(CUR); };
+  }
+  function showForm(c) {
+    c = c || {};
+    var mode = c.m3u && !c.host ? "m3u" : "x";
+    v.innerHTML = "<h1>" + hello() + "</h1><p>Agora informe os dados da sua lista IPTV. Você recebe esses dados de quem fornece o seu IPTV.</p>" +
+      '<div class="tabs"><button class="tab" id="tx">Servidor e senha</button><button class="tab" id="tm">Link M3U</button></div>' +
+      '<div class="card"><div id="fx"><label>Servidor (endereço)</label><input id="host" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ex.: http://servidor.com:8080" value="' + esc(c.host || "") + '">' +
+      '<label>Usuário</label><input id="user" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(c.username || "") + '">' +
+      '<label>Senha</label><div class="pw"><input id="pass" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(c.password || "") + '"><button type="button" id="see">Mostrar</button></div></div>' +
+      '<div id="fm"><label>Link M3U</label><input id="m3u" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://servidor.com/get.php?username=…" value="' + esc(c.m3u || "") + '">' +
+      '<div class="hint">Se o link tiver usuário e senha, o Maik.Flix usa o modo completo (mais rápido e com guia de programação).</div></div></div>' +
+      '<button class="red" id="save">Salvar e conectar</button><div class="msg" id="msg"></div>' +
+      '<p class="small">Seus dados de IPTV ficam guardados na sua conta e só aparecem nos aparelhos em que você entrar.</p>';
+    var tx = document.getElementById("tx"), tm = document.getElementById("tm"), fx = document.getElementById("fx"), fm = document.getElementById("fm");
+    function setMode(m) { mode = m; tx.className = "tab" + (m === "x" ? " on" : ""); tm.className = "tab" + (m === "m3u" ? " on" : ""); fx.style.display = m === "x" ? "" : "none"; fm.style.display = m === "m3u" ? "" : "none"; }
+    tx.onclick = function () { setMode("x"); }; tm.onclick = function () { setMode("m3u"); };
+    setMode(mode);
+    document.getElementById("see").onclick = function () { var p = document.getElementById("pass"); p.type = p.type === "password" ? "text" : "password"; this.textContent = p.type === "password" ? "Mostrar" : "Ocultar"; };
+    document.getElementById("save").onclick = function () {
+      var msg = document.getElementById("msg"), cfg;
+      msg.textContent = "";
+      if (mode === "x") {
+        var h = cleanHost(document.getElementById("host").value), u = document.getElementById("user").value.trim(), p = document.getElementById("pass").value.trim();
+        if (!h || !u || !p) { msg.textContent = "Preencha servidor, usuário e senha."; return; }
+        cfg = { host: h, username: u, password: p };
+      } else {
+        var m = document.getElementById("m3u").value.trim();
+        if (!/^https?:\/\//i.test(m)) { msg.textContent = "Cole o link completo, começando com http:// ou https://"; return; }
+        var x = fromM3u(m);
+        cfg = x ? { host: x.host, username: x.username, password: x.password, m3u: m } : { m3u: m };
+      }
+      cfg.ts = Date.now();
+      this.disabled = true; this.textContent = "Salvando…";
+      var btn = this;
+      api("/rest/v1/rpc/sync_push", "POST", { patch: { iptv: [cfg.ts, cfg] } }).then(function () { finish(); })
+        .catch(function (e) { btn.disabled = false; btn.textContent = "Salvar e conectar"; msg.textContent = "Não consegui salvar (" + e.message + "). Tente de novo."; });
+    };
+  }
+  function finish() {
+    v.innerHTML = '<div class="spin"></div><p style="margin-top:18px">Conectando o Maik.Flix…</p>';
+    api("/rest/v1/rpc/pair_put", "POST", { pid: pid, token: RT }).then(function () {
+      v.innerHTML = '<div class="ok">' + CHECK + "</div><h1>Pronto" + (WHO ? ", " + esc(WHO.split(" ")[0]) : "") + "!</h1>" +
+        "<p>Pode voltar para o Maik.Flix — ele conecta sozinho em alguns segundos e já abre a sua lista.</p>" +
+        (EMAIL ? '<p class="small">Conta: ' + esc(EMAIL) + "</p>" : "");
+    }).catch(function (e) {
+      v.innerHTML = '<h1 class="err">Não deu certo</h1><p>Não consegui avisar o app (' + esc(e.message) + "). Gere um QR code novo e tente de novo.</p>";
+    });
   }
 </script>
 </body>
