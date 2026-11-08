@@ -1,16 +1,16 @@
 {
-  "updated": "2026-11-08T05:49:41Z",
+  "updated": "2026-11-08T05:54:22Z",
   "apk": {
-    "versionCode": 12,
-    "versionName": "1.0.12",
-    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-12/MaikFlix.apk",
-    "sha256": "67cb054f3ed3a3dd7222426c8faa40909cd8cd4415e7f6e1a4f09c9316fb9d74",
-    "notes": "Ícone adaptável do Android; atualização abre no navegador (sem instalador dentro do app, evita bloqueio do…"
+    "versionCode": 13,
+    "versionName": "1.0.13",
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-13/MaikFlix.apk",
+    "sha256": "834afb1167e96e5bcdc55aab37cbc2b6a5f44ef4d0d41002ea4d84c6cb99d285",
+    "notes": "Mostra a versão do app e o botão Verificar atualização em Minha Lista"
   },
   "tv": {
     "version": "1.12.0",
-    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-12/com.filipe.flixtv_1.12.0_all.ipk",
-    "sha256": "a032d0b2583201e1d856a97ac6fc7da2b2ead796f9548b33a2bc81fdaf7cd783",
-    "notes": "Ícone adaptável do Android; atualização abre no navegador (sem instalador dentro do app, evita bloqueio do…"
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-13/com.filipe.flixtv_1.12.0_all.ipk",
+    "sha256": "1140ce2b205357731eb461272121bbefca9a8ca103ec504889e71afac0fef86e",
+    "notes": "Mostra a versão do app e o botão Verificar atualização em Minha Lista"
   }
 }
