@@ -1,16 +1,16 @@
 {
-  "updated": "2026-11-08T05:41:24Z",
+  "updated": "2026-11-08T05:49:41Z",
   "apk": {
-    "versionCode": 11,
-    "versionName": "1.0.11",
-    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-11/MaikFlix.apk",
-    "sha256": "25b672e9c9aeca65fc146420ed78663d277aa451dbb0b363a0cd9e9af3351d81",
-    "notes": "Segurança: lista IPTV fora da nuvem (QR criptografado), minimização de dados, apagar dados, sair de todos; atualizaç"
+    "versionCode": 12,
+    "versionName": "1.0.12",
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-12/MaikFlix.apk",
+    "sha256": "67cb054f3ed3a3dd7222426c8faa40909cd8cd4415e7f6e1a4f09c9316fb9d74",
+    "notes": "Ícone adaptável do Android; atualização abre no navegador (sem instalador dentro do app, evita bloqueio do…"
   },
   "tv": {
     "version": "1.12.0",
-    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-11/com.filipe.flixtv_1.12.0_all.ipk",
-    "sha256": "29a177118108d47c8da6e1bc0885785922236c2eaa1317e4b01ee63341f3515c",
-    "notes": "Segurança: lista IPTV fora da nuvem (QR criptografado), minimização de dados, apagar dados, sair de todos; atualizaç"
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-12/com.filipe.flixtv_1.12.0_all.ipk",
+    "sha256": "a032d0b2583201e1d856a97ac6fc7da2b2ead796f9548b33a2bc81fdaf7cd783",
+    "notes": "Ícone adaptável do Android; atualização abre no navegador (sem instalador dentro do app, evita bloqueio do…"
   }
 }
