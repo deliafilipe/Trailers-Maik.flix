@@ -1,0 +1,16 @@
+{
+  "updated": "2026-11-08T05:41:24Z",
+  "apk": {
+    "versionCode": 11,
+    "versionName": "1.0.11",
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-11/MaikFlix.apk",
+    "sha256": "25b672e9c9aeca65fc146420ed78663d277aa451dbb0b363a0cd9e9af3351d81",
+    "notes": "Segurança: lista IPTV fora da nuvem (QR criptografado), minimização de dados, apagar dados, sair de todos; atualizaç"
+  },
+  "tv": {
+    "version": "1.12.0",
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-11/com.filipe.flixtv_1.12.0_all.ipk",
+    "sha256": "29a177118108d47c8da6e1bc0885785922236c2eaa1317e4b01ee63341f3515c",
+    "notes": "Segurança: lista IPTV fora da nuvem (QR criptografado), minimização de dados, apagar dados, sair de todos; atualizaç"
+  }
+}
