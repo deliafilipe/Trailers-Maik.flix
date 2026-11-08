@@ -1,16 +1,16 @@
 {
-  "updated": "2026-11-08T06:31:30Z",
+  "updated": "2026-11-08T06:33:36Z",
   "apk": {
-    "versionCode": 14,
-    "versionName": "1.0.14",
-    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-14/MaikFlix.apk",
-    "sha256": "b4d7d85c7f6fbf1e58f29d349f6c0aab4f4047bff65ee919f386b27f0daac047",
-    "notes": "Celular: visual novo — barra flutuante de vidro, destaque com cor do pôster, Explore por clima, Continuar…"
+    "versionCode": 15,
+    "versionName": "1.0.15",
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-15/MaikFlix.apk",
+    "sha256": "71d4934100d68acc29f43e55fca46ea23fcc5467011afba621cc0362985f08ae",
+    "notes": "TV 1.13.0: visual novo — destaque de tela inteira, menu em pílula, metadados em chips, Explore por clima, 2…"
   },
   "tv": {
-    "version": "1.12.0",
-    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-14/com.filipe.flixtv_1.12.0_all.ipk",
-    "sha256": "c33f94db231590687e955f00b9b68b8e1ba427517f7a35297f4d23e1655a954d",
-    "notes": "Celular: visual novo — barra flutuante de vidro, destaque com cor do pôster, Explore por clima, Continuar…"
+    "version": "1.13.0",
+    "url": "https://github.com/deliafilipe/Trailers-Maik.flix/releases/download/apk-15/com.filipe.flixtv_1.13.0_all.ipk",
+    "sha256": "b38e6329e32d2337d9ae072ea63fe3c7f774b35c8a0e6246e177afb375976d09",
+    "notes": "TV 1.13.0: visual novo — destaque de tela inteira, menu em pílula, metadados em chips, Explore por clima, 2…"
   }
 }
